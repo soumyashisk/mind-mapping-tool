@@ -1,21 +1,15 @@
 const mapArea = document.getElementById("mapArea");
 let nodeId = 0;
 
-mapArea.addEventListener("click", (e) => {
-  createNode(e.clientX, e.clientY);
+mapArea.addEventListener("dblclick", (e) => {
+  const el = e.target;
+  if (el.id === "mapArea") {
+    createNode(e.clientX, e.clientY);
+  }
 });
 
-function createNode(x, y) {
-  const node = document.createElement("div");
-  node.className = "node";
-  node.textContent = "Node " + ++nodeId;
-  // node.contentEditable = true;
-  node.style.opacity = 0;
-  node.style.pointerEvents = "none";
-
-  mapArea.appendChild(node);
-
-  const posX = Math.max(
+const calculatePosX = (x, node) =>
+  Math.max(
     10,
     Math.min(
       x - node.clientWidth / 2,
@@ -23,7 +17,8 @@ function createNode(x, y) {
     )
   );
 
-  const posY = Math.max(
+const calculatePosY = (y, node) =>
+  Math.max(
     10,
     Math.min(
       y - node.clientHeight / 2,
@@ -31,11 +26,55 @@ function createNode(x, y) {
     )
   );
 
-  node.style.left = posX + "px";
-  node.style.top = posY + "px";
+function createNode(x, y) {
+  const node = document.createElement("div");
+  node.className = "node";
+  node.textContent = "Node " + ++nodeId;
+  node.style.opacity = 0;
+  node.style.pointerEvents = "none";
+  mapArea.appendChild(node);
+
+  node.style.left = calculatePosX(x, node) + "px";
+  node.style.top = calculatePosY(y, node) + "px";
   node.dataset.id = nodeId;
   node.style.opacity = 1;
   node.style.pointerEvents = "all";
 
+  node.ondblclick = () => {
+    node.contentEditable = true;
+    node.focus();
+  };
+
+  node.onblur = () => {
+    node.contentEditable = false;
+  };
+
+  node.onkeydown = (e) => {
+    if (e.key === "Escape") {
+      node.contentEditable = false;
+    }
+  };
+
+  makeDraggable(node);
+
   return node;
+}
+
+function makeDraggable(node) {
+  let isDragging = false;
+
+  node.addEventListener("mousedown", (e) => {
+    isDragging = true;
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    node.style.left = calculatePosX(e.clientX, node) + "px";
+    node.style.top = calculatePosY(e.clientY, node) + "px";
+    // updateLines();
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
 }
