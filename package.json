@@ -3,6 +3,6 @@
   "private": false,
   "scripts": {
     "dev": "bun run index.html",
-    "build": "bun build --minify --splitting --outdir=dist index.html"
+    "build": "bun build --minify --splitting --outdir=public index.html"
   }
 }
