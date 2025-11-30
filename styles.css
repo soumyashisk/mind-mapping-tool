@@ -35,7 +35,7 @@ body {
   cursor: grabbing;
 }
 
-.node > .colorpicker {
+.node > .color-picker {
   background-color: #e2e2e2;
   width: 8px;
 }

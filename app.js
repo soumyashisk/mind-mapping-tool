@@ -1,6 +1,7 @@
 const mapArea = document.getElementById("mapArea");
 const connectionsContainer = document.querySelector("#connections");
 const nodeTemplate = document.getElementById("nodeTemplate");
+const hiddenColorPicker = document.getElementById("hiddenColorPicker");
 
 let nodeId = 0;
 let connections = [];
@@ -39,6 +40,8 @@ export function createNode(x, y) {
   const fragment = nodeTemplate.content.cloneNode(true);
   const node = fragment.querySelector(".node");
   const nodeTextEl = fragment.querySelector(".text");
+  const nodeColorPicker = fragment.querySelector(".color-picker");
+
   node.className = "node";
   node.style.opacity = 0;
   node.style.pointerEvents = "none";
@@ -65,6 +68,10 @@ export function createNode(x, y) {
     sel.addRange(range);
 
     node.focus();
+  };
+
+  nodeColorPicker.click = (e) => {
+    console.log("click");
   };
 
   function disableNodeEditing() {
@@ -135,9 +142,26 @@ function updateConnection(node) {
   }
 }
 
+function rgbToHex(rgb) {
+  const result = rgb.match(/\d+/g).map(Number);
+  return "#" + result.map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
 let selectedNode = null;
 mapArea.addEventListener("click", (e) => {
-  console.log(e.target);
+  if (
+    e.target.classList.contains("node-clickable") &&
+    e.target.classList.contains("color-picker")
+  ) {
+    const rgb = getComputedStyle(e.target.parentElement).backgroundColor;
+    hiddenColorPicker.value = rgbToHex(rgb);
+    hiddenColorPicker.click();
+    hiddenColorPicker.oninput = () => {
+      e.target.parentElement.style.backgroundColor = hiddenColorPicker.value;
+    };
+    return;
+  }
+
   if (e.target.classList.contains("node-clickable") && e.ctrlKey) {
     const node = e.target.classList.contains("child")
       ? e.target.parentElement
