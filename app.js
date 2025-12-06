@@ -40,7 +40,6 @@ export function createNode(x, y) {
   const fragment = nodeTemplate.content.cloneNode(true);
   const node = fragment.querySelector(".node");
   const nodeTextEl = fragment.querySelector(".text");
-  const nodeColorPicker = fragment.querySelector(".color-picker");
 
   node.className = "node";
   node.style.opacity = 0;
@@ -62,16 +61,12 @@ export function createNode(x, y) {
     nodeTextEl.contentEditable = true;
 
     const range = document.createRange();
-    range.selectNodeContents(node);
+    range.selectNodeContents(nodeTextEl);
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 
-    node.focus();
-  };
-
-  nodeColorPicker.click = (e) => {
-    console.log("click");
+    nodeTextEl.focus();
   };
 
   function disableNodeEditing() {
@@ -93,16 +88,26 @@ export function createNode(x, y) {
   };
 
   let isDragging = false;
-
+  let offsetX = 0,
+    offsetY = 0;
   node.addEventListener("mousedown", (e) => {
+    offsetX =
+      parseInt(node.style.left) + parseInt(node.clientWidth) / 2 - e.clientX;
+    offsetY =
+      parseInt(node.style.top) + parseInt(node.clientHeight) / 2 - e.clientY;
     isDragging = true;
   });
 
   document.addEventListener("mousemove", (e) => {
     if (!isDragging) return;
-    const nodePostition = calculateNodePosition(e.clientX, e.clientY, node);
+    const nodePostition = calculateNodePosition(
+      e.clientX + offsetX,
+      e.clientY + offsetY,
+      node,
+    );
     node.style.left = nodePostition.left;
     node.style.top = nodePostition.top;
+
     updateConnection(node);
   });
 
@@ -147,23 +152,32 @@ function rgbToHex(rgb) {
   return "#" + result.map((v) => v.toString(16).padStart(2, "0")).join("");
 }
 
+function rgbToRGBA(rgb, a = 1) {
+  const result = rgb.match(/\d+/g).map(Number);
+  const r = result[0],
+    g = result[1],
+    b = result[2];
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
 let selectedNode = null;
 mapArea.addEventListener("click", (e) => {
-  if (
-    e.target.classList.contains("node-clickable") &&
-    e.target.classList.contains("color-picker")
-  ) {
-    const rgb = getComputedStyle(e.target.parentElement).backgroundColor;
+  console.log(e.target);
+  if (e.target.classList.contains("color-picker")) {
+    const rgb = getComputedStyle(e.target).backgroundColor;
     hiddenColorPicker.value = rgbToHex(rgb);
     hiddenColorPicker.click();
     hiddenColorPicker.oninput = () => {
-      e.target.parentElement.style.backgroundColor = hiddenColorPicker.value;
+      e.target.style.backgroundColor = hiddenColorPicker.value;
+      const rgb = getComputedStyle(e.target).backgroundColor;
+      e.target.parentElement.style.outlineColor = rgbToRGBA(rgb, 0.6);
+      e.target.parentElement.style.background = `linear-gradient(90deg, ${rgb} 0%, rgba(115, 115, 115, 1) 100%)`;
     };
     return;
   }
 
   if (e.target.classList.contains("node-clickable") && e.ctrlKey) {
-    const node = e.target.classList.contains("child")
+    const node = e.target.parentElement.classList.contains("node")
       ? e.target.parentElement
       : e.target;
     if (!selectedNode) {

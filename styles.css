@@ -26,9 +26,9 @@ body {
   display: flex;
   width: fit-content;
   position: absolute;
-  background: #777777;
   cursor: grab;
   user-select: none;
+  background: #777777;
 }
 
 .node:active {
@@ -46,7 +46,7 @@ body {
 }
 
 .node:has(.text:focus) {
-  outline: 2px solid #fff;
+  outline: 2px solid rgba(1, 1, 1, 0.6);
 }
 svg {
   position: absolute;
@@ -58,6 +58,6 @@ svg {
 }
 
 line {
-  stroke: #888888;
-  stroke-width: 2;
+  stroke: #dddddd;
+  stroke-width: 2px;
 }
